@@ -5,14 +5,14 @@ from vk_api.utils import get_random_id
 
 from config import community_token, access_token
 from core import VkTools
+from data_store import check_user
 # отправка сообщений
-
 
 class BotInterface():
     def __init__(self, community_token, access_token):
         self.vk = vk_api.VkApi(token=community_token)
         self.longpoll = VkLongPoll(self.vk)
-        self.vk_tools = VkTools(acces_token)
+        self.vk_tools = VkTools(access_token)
         self.params = {}
         self.worksheets = []
         self.offset = 0
@@ -46,25 +46,22 @@ class BotInterface():
                         for photo in photos:
                             photo_string += f'photo{photo["owner_id"]}_{photo["id"]},'
                     else:
-                        self.worksheets = self.vk_tools.search_worksheet(
-                            self.params, self.offset)
-
+                        self.worksheets = self.vk_tools.search_worksheet(self.params, self.offset)
                         worksheet = self.worksheets.pop()
-                        'проверка анкеты в бд в соотвествие с event.user_id'
-
                         photos = self.vk_tools.get_photos(worksheet['id'])
                         photo_string = ''
                         for photo in photos:
                             photo_string += f'photo{photo["owner_id"]}_{photo["id"]},'
                         self.offset += 10
 
-                    self.message_send(
-                        event.user_id,
+                    self.message_send(event.user_id,
                         f'имя: {worksheet["name"]} ссылка: vk.com/{worksheet["id"]}',
-                        attachment=photo_string
-                    )
+                        attachment=photo_string)
 
-                    'добавить анкету в бд в соотвествие с event.user_id'
+                    '''проверка анкеты в БД, добавить анкету в бд в соотвествие с event.user_id'''
+
+                    if not check_user(engine, event.user_id, worksheet["id"]):
+                    add_user(engine, event.user_id, worksheet["id"])
 
                 elif event.text.lower() == 'пока':
                     self.message_send(

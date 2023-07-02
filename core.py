@@ -81,7 +81,9 @@ class VkTools:
                    'comments': item['comments']['count']
                    } for item in photos['items']
                   ]
-        '''сортировка п лайкам и комментам'''
+        '''сортировка по лайкам и комментам'''
+        result.sort(key=lambda x: x['likes'] + x['comments'] * 10, reverse=True)
+
         return result[:3]
 
 
