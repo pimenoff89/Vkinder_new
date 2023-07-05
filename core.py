@@ -3,7 +3,6 @@ from datetime import datetime
 # импорты
 import vk_api
 from vk_api.exceptions import ApiError
-
 from config import access_token
 
 
@@ -85,6 +84,7 @@ class VkTools:
         result.sort(key=lambda x: x['likes'] + x['comments'] * 10, reverse=True)
 
         return result[:3]
+
 
 
 if __name__ == '__main__':

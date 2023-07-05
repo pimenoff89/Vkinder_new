@@ -4,9 +4,11 @@ from sqlalchemy.orm import declarative_base
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import Session
 from config import db_url_object
+import psycopg2
 
 metadata = MetaData()
 Base = declarative_base()
+#engine = create_engine(db_url_object)
 
 
 class Viewed(Base):
@@ -15,8 +17,22 @@ class Viewed(Base):
     worksheet_id = sq.Column(sq.Integer, primary_key=True)
 
 
-# добавление записи в бд
+def create_connection(db_name, db_user, db_password, db_host, db_port):
+    connection = None
+    try:
+        connection = psycopg2.connect(
+            database=db_name,
+            user=db_user,
+            password=db_password,
+            host=db_host,
+            port=db_port,
+        )
+        print("Соединение с PostgreSQL DB прошло успешно")
+    except OperationalError as e:
+        print(f"Ошибка '{e}' возникла")
+    return connection
 
+# добавление записи в бд
 
 def add_user(engine, profile_id, worksheet_id):
     with Session(engine) as session:

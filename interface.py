@@ -5,7 +5,7 @@ from vk_api.utils import get_random_id
 
 from config import community_token, access_token
 from core import VkTools
-from data_store import check_user
+from data_store import check_user, create_connection, add_user
 # отправка сообщений
 
 class BotInterface():
@@ -24,6 +24,12 @@ class BotInterface():
                         'attachment': attachment,
                         'random_id': get_random_id()}
                        )
+    def simple_function(self):
+        worksheet = self.worksheets.pop()
+        photos = self.vk_tools.get_photos(worksheet['id'])
+        photo_string = ''
+        for photo in photos:
+            photo_string += f'photo{photo["owner_id"]}_{photo["id"]},'
 
 # обработка событий / получение сообщений
 
@@ -34,32 +40,24 @@ class BotInterface():
                     '''Логика для получения данных о пользователе'''
                     self.params = self.vk_tools.get_profile_info(event.user_id)
                     self.message_send(
-                        event.user_id, f'Привет друг, {self.params["name"]}')
+                        event.user_id, f'Привет друг, {self.params["name"]}, если ты введешь команду "поиск",то мы начнем искать подходящую анкету')
                 elif event.text.lower() == 'поиск':
                     '''Логика для поиска анкет'''
                     self.message_send(
                         event.user_id, 'Начинаем поиск')
                     if self.worksheets:
-                        worksheet = self.worksheets.pop()
-                        photos = self.vk_tools.get_photos(worksheet['id'])
-                        photo_string = ''
-                        for photo in photos:
-                            photo_string += f'photo{photo["owner_id"]}_{photo["id"]},'
+                        simple_function()
                     else:
                         self.worksheets = self.vk_tools.search_worksheet(self.params, self.offset)
-                        worksheet = self.worksheets.pop()
-                        photos = self.vk_tools.get_photos(worksheet['id'])
-                        photo_string = ''
-                        for photo in photos:
-                            photo_string += f'photo{photo["owner_id"]}_{photo["id"]},'
+                        simple_function()
                         self.offset += 10
 
                     self.message_send(event.user_id,
-                        f'имя: {worksheet["name"]} ссылка: vk.com/{worksheet["id"]}',
+                        f'имя: {worksheet["name"]} ссылка: vk.com/id{worksheet["id"]}',
                         attachment=photo_string)
 
                     '''проверка анкеты в БД, добавить анкету в бд в соотвествие с event.user_id'''
-
+                    create_connection(postgres, postgres, plant495, 5432)
                     if not check_user(engine, event.user_id, worksheet["id"]):
                     add_user(engine, event.user_id, worksheet["id"])
 
