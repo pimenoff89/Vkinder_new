@@ -30,6 +30,7 @@ class BotInterface():
         photo_string = ''
         for photo in photos:
             photo_string += f'photo{photo["owner_id"]}_{photo["id"]},'
+        return worksheet
 
 # обработка событий / получение сообщений
 
@@ -46,14 +47,14 @@ class BotInterface():
                     self.message_send(
                         event.user_id, 'Начинаем поиск')
                     if self.worksheets:
-                        simple_function()
+                        self.simple_function()
                     else:
                         self.worksheets = self.vk_tools.search_worksheet(self.params, self.offset)
-                        simple_function()
+                        worksheet = self.simple_function()
                         self.offset += 10
 
                     self.message_send(event.user_id,
-                        f'имя: {worksheet["name"]} ссылка: vk.com/id{worksheet["id"]}',
+                        f'имя: {self.worksheet["name"]} ссылка: vk.com/id{self.worksheet["id"]}',
                         attachment=photo_string)
 
                     '''проверка анкеты в БД, добавить анкету в бд в соотвествие с event.user_id'''
